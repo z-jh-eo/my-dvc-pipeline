@@ -1,0 +1,15 @@
+[workspace]
+authors = ["Jiahua <jiahuazh_07@outlook.com>"]
+channels = ["conda-forge", "pypi"]
+name = "my-repo"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+numpy = ">=2.4.2,<3"
+python = ">=3.14.3,<3.15"
+
+[pypi-dependencies]
+soundfile = ">=0.13.1, <0.14"
