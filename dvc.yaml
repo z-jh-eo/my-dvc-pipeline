@@ -1,0 +1,41 @@
+stages:
+  make_manifest_clean:
+    foreach: ${languages}
+    do:
+      cmd: python make_manifest.py
+            --lang     ${key}
+            --metadata ${item.metadata}
+            --wav-dir  ${item.wav_dir}
+            --out      data/manifests/${key}/clean.jsonl
+      deps:
+        - make_manifest.py
+        - noise.py
+        - ${item.metadata}
+        - ${item.wav_dir}
+      params:
+        - languages
+      outs:
+        - data/manifests/${key}/clean.jsonl
+
+  make_manifest_noisy:
+    foreach: ${languages}
+    do:
+      cmd: python add_noise.py
+            --lang     ${key}
+            --metadata ${item.metadata}
+            --wav-dir  ${item.wav_dir}
+            --out-dir  data/manifests/${key}/noisy/
+            --noisy-wav-dir data/noisy/${key}/
+      deps:
+        - make_manifest.py
+        - noise.py
+        - ${item.metadata}
+        - ${item.wav_dir}
+      params:
+        - languages
+        - snr_levels
+        - seed
+      outs:
+        - data/manifests/${key}/noisy/
+        - data/noisy/${key}/
+
