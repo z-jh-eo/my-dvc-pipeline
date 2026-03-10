@@ -4,9 +4,7 @@ import hashlib
 import os
 import subprocess
 
-import numpy as np
 import pandas as pd
-
 from noise import add_noise_to_file
 
 
@@ -19,7 +17,9 @@ def get_phonemes(text: str, lang: str) -> str:
     if not text or (isinstance(text, float)):
         return ""
     res = subprocess.run(
-        ["espeak-ng", "-v", lang, "-q", "--ipa", text], capture_output=True, text=True
+        ["espeak-ng", "-v", lang, "-q", "--ipa", text],
+        capture_output=True,
+        text=True
     )
     return res.stdout.strip()
 
@@ -46,7 +46,8 @@ def process_utterance(
     seed: int | None,
 ) -> dict:
     src_wav = convert_to_wav(
-        os.path.join(wav_dir, row["audio_file"]), out_dir=wav_dir.rstrip("/") + "_wav/"
+        os.path.join(wav_dir, row["audio_file"]),
+        out_dir=wav_dir.rstrip("/") + "_wav/"
     )
 
     if snr_db is None:  # clean case
