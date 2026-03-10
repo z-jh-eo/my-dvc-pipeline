@@ -16,10 +16,25 @@ def get_md5(filepath: str) -> str:
 
 
 def get_phonemes(text: str, lang: str) -> str:
+    if not text or (isinstance(text, float)):
+        return ""
     res = subprocess.run(
         ["espeak-ng", "-v", lang, "-q", "--ipa", text], capture_output=True, text=True
     )
     return res.stdout.strip()
+
+
+def convert_to_wav(src_path: str, out_dir: str) -> str:
+    os.makedirs(out_dir, exist_ok=True)
+    stem = os.path.splitext(os.path.basename(src_path))[0]
+    wav_path = os.path.join(out_dir, stem + ".wav")
+    if not os.path.exists(wav_path):
+        subprocess.run(
+            ["ffmpeg", "-i", src_path, "-ar", "16000", "-ac", "1", wav_path],
+            check=True,
+            capture_output=True,
+        )
+    return wav_path
 
 
 def process_utterance(
@@ -30,7 +45,9 @@ def process_utterance(
     noisy_wav_dir: str | None,
     seed: int | None,
 ) -> dict:
-    src_wav = os.path.join(wav_dir, row["audio_file"])
+    src_wav = convert_to_wav(
+        os.path.join(wav_dir, row["audio_file"]), out_dir=wav_dir.rstrip("/") + "_wav/"
+    )
 
     if snr_db is None:  # clean case
         out_wav = src_wav
@@ -41,12 +58,17 @@ def process_utterance(
 
         add_noise_to_file(src_wav, out_wav, snr_db, seed)
 
+    transcription = row.get("transcription", "")
+    transcription = "" if not isinstance(transcription, str) else transcription
+
+    src_stem = os.path.splitext(os.path.basename(src_wav))[0]
+
     return {
-        "utt_id": row["audio_id"],
+        "utt_id": lang + "_" + src_stem,
         "lang": lang,
         "wav_path": out_wav,
-        "ref_text": row["transcription"],
-        "ref_phon": get_phonemes(row["transcription"], lang),
+        "ref_text": transcription,
+        "ref_phon": get_phonemes(transcription, lang),
         "audio_md5": get_md5(out_wav),
         "sr": 16_000,
         "duration_s": row["duration_ms"] / 1_000,
@@ -74,7 +96,7 @@ if __name__ == "__main__":
 
     tmp_path = args.out + ".tmp"
     try:
-        with open(tmp_path, "w", encoding="urf-8") as f:
+        with open(tmp_path, "w", encoding="utf-8") as f:
             for _, row in md.iterrows():
                 entry = process_utterance(
                     row=row.to_dict(),
