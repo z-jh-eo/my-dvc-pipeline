@@ -1,8 +1,9 @@
 languages:
   en:
-    metadata: data/sps-corpus-1.0-2025-11-25-en/ss-corpus-en.tsv
-    wav_dir:  data/sps-corpus-1.0-2025-11-25-en/audios/
+    #metadata: data/sps-corpus-1.0-2025-11-25-en/ss-corpus-en.tsv
+    metadata: data/test_sample/sample_md.tsv
+    wav_dir: data/sps-corpus-1.0-2025-11-25-en/audios/
 
-snr_levels: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45]
+snr_levels: [0, 5, 10]
 seed: 42
 batch_size: 16
