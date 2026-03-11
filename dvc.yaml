@@ -20,19 +20,73 @@ stages:
   make_manifest:
     foreach: ${languages}
     do:
-      cmd: python add_noise_stage.py
-            --lang     ${key}
-            --manifest data/manifests/${key}/clean.jsonl
-            --out-dir  data/manifests/${key}/noisy/
+      cmd: python add_noise.py
+            --manifest      data/manifests/${key}/clean.jsonl
+            --out-dir       data/manifests/${key}/noisy/
             --noisy-wav-dir data/noisy/${key}/
       deps:
         - make_manifest.py
-        - add_noise_stage.py
+        - noise.py
+        - add_noise.py
         - data/manifests/${key}/clean.jsonl
       params:
-        - languages
         - snr_levels
         - seed
       outs:
         - data/manifests/${key}/noisy/
         - data/noisy/${key}/
+
+  evaluate_clean:
+    foreach: ${languages}
+    do:
+      cmd: python evaluation.py
+            --manifest    data/manifests/${key}/clean.jsonl
+            --out-pred    data/predictions/${key}/clean.jsonl
+            --out-metrics data/metrics/${key}/clean.json
+            --batch-size  ${batch_size}
+      deps:
+        - evaluation.py
+        - data/manifests/${key}/clean.jsonl
+      params:
+        - batch_size
+      outs:
+        - data/predictions/${key}/clean.jsonl
+      metrics:
+        - data/metrics/${key}/clean.json:
+            cache: false
+
+  evaluate_noisy:
+    foreach: ${languages}
+    do:
+      cmd: python eval_stage.py
+            --manifest-dir  data/manifests/${key}/noisy/
+            --pred-dir      data/predictions/${key}/noisy/
+            --metrics-dir   data/metrics/${key}/noisy/
+            --out-summary   data/metrics/${key}/noisy_summary.json
+            --batch-size    ${batch_size}
+      deps:
+        - evaluation.py
+        - eval_stage.py
+        - data/manifests/${key}/noisy/
+      params:
+        - snr_levels
+        - batch_size
+      outs:
+        - data/predictions/${key}/noisy/
+      metrics:
+        - data/metrics/${key}/noisy_summary.json:
+            cache: false
+
+  plot_results:
+    cmd: python plot_curve.py
+          --metrics-dir data/metrics/
+          --out-plot    results/figures/per_vs_snr.png
+    deps:
+      - plot_curve.py
+      - data/metrics/
+    params:
+      - languages
+      - snr_levels
+    plots:
+      - results/figures/per_vs_snr.png:
+          cache: false

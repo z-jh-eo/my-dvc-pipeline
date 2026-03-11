@@ -18,6 +18,10 @@ dvc = ">=3.66.1,<4"
 python-dateutil = ">=2.9.0.post0,<3"
 pandas = ">=3.0.1,<4"
 ffmpeg = ">=8.0.1,<9"
+python-levenshtein = ">=0.27.3,<0.28"
+matplotlib = ">=3.10.8,<4"
+protobuf = ">=6.33.5,<7"
 
 [pypi-dependencies]
 soundfile = ">=0.13.1, <0.14"
+phonemizer = ">=3.3.0, <4"

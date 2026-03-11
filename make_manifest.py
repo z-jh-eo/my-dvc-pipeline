@@ -12,30 +12,6 @@ def get_md5(filepath: str) -> str:
         return hashlib.md5(f.read()).hexdigest()
 
 
-def get_phonemes(text: str, lang: str) -> str:
-    if not text or (isinstance(text, float)):
-        return ""
-    res = subprocess.run(
-        ["espeak-ng", "-v", lang, "-q", "--ipa", text],
-        capture_output=True,
-        text=True
-    )
-    return res.stdout.strip()
-
-
-def convert_to_wav(src_path: str, out_dir: str) -> str:
-    os.makedirs(out_dir, exist_ok=True)
-    stem = os.path.splitext(os.path.basename(src_path))[0]
-    wav_path = os.path.join(out_dir, stem + ".wav")
-    if not os.path.exists(wav_path):
-        subprocess.run(
-            ["ffmpeg", "-i", src_path, "-ar", "16000", "-ac", "1", wav_path],
-            check=True,
-            capture_output=True,
-        )
-    return wav_path
-
-
 def process_utterance(
         json_row: dict,
         snr_db: float,
