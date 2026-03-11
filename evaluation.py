@@ -7,7 +7,12 @@ processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv
 model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft")
 
 
-def inference(file_paths, processor, model):
+def inference(
+    file_paths:list,
+    processor:Wav2Vec2Processor,
+    model:Wav2Vec2ForCTC
+) -> list:
+    
     audio_arrays = []
     for path in file_paths:
         waveform, sr = torchaudio.load(path)
@@ -24,4 +29,5 @@ def inference(file_paths, processor, model):
 
     predicted_ids = torch.argmax(logits, dim=-1)
     return processor.batch_decode(predicted_ids)
+
 
